@@ -59,7 +59,23 @@ def init(
 
 
 @app.command()
-def rm_andoc(path: str = '.'):
+def add_doc(
+    file: Annotated[
+        str,
+        typer.Argument(
+            help="(str) 📄 The path to the file.",
+            rich_help_panel="Optional Arguments"
+        )
+    ],
+
+    line: Annotated[
+        int | None,
+        typer.Argument(
+            help="(int) 🏷️ The line number to add the documentation to.",
+            rich_help_panel="Optional Arguments"
+        )
+    ] = None,
+):
     pass
 
 
