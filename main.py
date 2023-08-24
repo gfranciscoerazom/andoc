@@ -21,13 +21,7 @@ def init(
             help="(str) 📂 The path where the repository will be created.",
             rich_help_panel="Optional Arguments"
         ) # type: ignore
-    ] = '.',
-    add_to_gitignore: Annotated[
-        bool,
-        typer.Option(
-            help="(bool) Whether to add the andoc directory to the .gitignore file.",
-        ) # type: ignore
-    ] = False
+    ] = '.'
 ):
     """
     Initializes an andoc repository at the specified path.
@@ -50,15 +44,6 @@ def init(
     # Create the repository
     print(f"Initializing andoc repository at \"{os.path.abspath(path)}\"")
     os.mkdir(os.path.join(path, 'andoc'))
-
-    # Add the .andoc to the .gitignore file
-    if add_to_gitignore:
-        if os.path.isfile(os.path.join(path, '.gitignore')):
-            with open(os.path.join(path, '.gitignore'), 'a') as f:
-                f.write(f"\nandoc")
-        else:
-            with open(os.path.join(path, '.gitignore'), 'w') as f:
-                f.write(f"andoc")
 
 
 def path_callback(ctx: typer.Context, path: str) -> Path | None:
@@ -95,13 +80,6 @@ def add_doc(
     # doc
     # tags
     # message
-
-    add_to_gitignore: Annotated[
-        bool,
-        typer.Option(
-            help="(bool) 🤫 Whether to add the andoc directory to the .gitignore file.",
-        ) # type: ignore
-    ] = False,
 ):
     """
     Adds documentation to the specified file.
