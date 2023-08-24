@@ -5,7 +5,6 @@ from rich.console import Console
 from helpers import path_to_andoc_folder
 from pathlib import Path
 import typer
-import os
 
 app = typer.Typer()
 
@@ -26,24 +25,36 @@ def init(
     """
     Initializes an andoc repository at the specified path.
     """
+    route = Path(path).resolve()
     # Verify that the path exists, if not exit
-    if not os.path.exists(path):
+    # if not os.path.exists(path):
+    #     printerr(f"[red]Invalid path:[/red] {path} does [bold underline]not exist[/bold underline]") 
+    #     raise typer.Exit(code=1)
+    if not route.exists():
         printerr(f"[red]Invalid path:[/red] {path} does [bold underline]not exist[/bold underline]") 
         raise typer.Exit(code=1)
 
     # Verify that the path is valid, if not exit
-    if not os.path.isdir(path):
+    # if not os.path.isdir(path):
+    #     printerr(f"[red]Invalid path:[/red] {path} is [bold underline]not a directory[/bold underline]") 
+    #     raise typer.Exit(code=1)
+    if not route.is_dir():
         printerr(f"[red]Invalid path:[/red] {path} is [bold underline]not a directory[/bold underline]") 
         raise typer.Exit(code=1)
     
     # Check if the path is already an andoc repository, if so exit
-    if os.path.isdir(os.path.join(path, 'andoc')):
+    # if os.path.isdir(os.path.join(path, 'andoc')):
+    #     printerr(f"[red]Invalid path:[/red] {path} is [bold underline]already an andoc repository[/bold underline]")
+    #     raise typer.Exit(code=1)
+    if (route / 'andoc').is_dir():
         printerr(f"[red]Invalid path:[/red] {path} is [bold underline]already an andoc repository[/bold underline]")
         raise typer.Exit(code=1)
 
     # Create the repository
-    print(f"Initializing andoc repository at \"{os.path.abspath(path)}\"")
-    os.mkdir(os.path.join(path, 'andoc'))
+    # print(f"Initializing andoc repository at \"{os.path.abspath(path)}\"")
+    # os.mkdir(os.path.join(path, 'andoc'))
+    print(f"Initializing andoc repository at \"{route.absolute()}\"")
+    (route / 'andoc').mkdir()
 
 
 def path_callback(ctx: typer.Context, path: str) -> Path | None:
