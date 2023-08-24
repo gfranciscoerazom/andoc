@@ -20,13 +20,13 @@ def init(
         typer.Argument(
             help="(str) 📂 The path where the repository will be created.",
             rich_help_panel="Optional Arguments"
-        )
+        ) # type: ignore
     ] = '.',
     add_to_gitignore: Annotated[
         bool,
         typer.Option(
             help="(bool) Whether to add the andoc directory to the .gitignore file.",
-        )
+        ) # type: ignore
     ] = False
 ):
     """
@@ -61,14 +61,27 @@ def init(
                 f.write(f"andoc")
 
 
+def path_callback(ctx: typer.Context, path: str) -> Path | None:
+    if ctx.resilient_parsing:
+        return
+    
+    route = Path(path).resolve()
+
+    if not route.exists():
+        printerr(f"[red]Invalid path:[/red] {path} does [bold underline]not exist[/bold underline]") 
+        raise typer.BadParameter(path)
+
+    return route
+
 @app.command()
 def add_doc(
     path: Annotated[
-        str,
+        Path,
         typer.Argument(
             help="(str) 📂 The path to the object to add documentation to.",
-            rich_help_panel="Optional Arguments"
-        )
+            rich_help_panel="Optional Arguments",
+            callback=path_callback
+        ) # type: ignore
     ],
 
     line: Annotated[
@@ -76,7 +89,7 @@ def add_doc(
         typer.Argument(
             help="(int) 🏷️ The line number to add the documentation to.",
             rich_help_panel="Optional Arguments"
-        )
+        ) # type: ignore
     ] = None,
 
     # doc
@@ -87,7 +100,7 @@ def add_doc(
         bool,
         typer.Option(
             help="(bool) 🤫 Whether to add the andoc directory to the .gitignore file.",
-        )
+        ) # type: ignore
     ] = False,
 ):
     """
