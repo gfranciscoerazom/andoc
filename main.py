@@ -1,119 +1,44 @@
-from typing import Optional
 from typing_extensions import Annotated
-from rich import print
-from rich.console import Console
-from helpers import path_to_andoc_folder
-from pathlib import Path
+import commands.add_doc as add_doc
+import commands.init as init
 import typer
 
-app = typer.Typer()
-
-err_console = Console(stderr=True)
-printerr = err_console.print
+from constants.strings.rich_format import BOLD_UNDERLINE
 
 
-@app.command()
-def init(
-    path: Annotated[
-        str,
-        typer.Argument(
-            help="(str) 📂 The path where the repository will be created.",
-            rich_help_panel="Optional Arguments"
-        ) # type: ignore
-    ] = '.'
-):
-    """
-    Initializes an andoc repository at the specified path.
-    """
-    route = Path(path).resolve()
-    # Verify that the path exists, if not exit
-    # if not os.path.exists(path):
-    #     printerr(f"[red]Invalid path:[/red] {path} does [bold underline]not exist[/bold underline]") 
-    #     raise typer.Exit(code=1)
-    if not route.exists():
-        printerr(f"[red]Invalid path:[/red] {path} does [bold underline]not exist[/bold underline]") 
-        raise typer.Exit(code=1)
-
-    # Verify that the path is valid, if not exit
-    # if not os.path.isdir(path):
-    #     printerr(f"[red]Invalid path:[/red] {path} is [bold underline]not a directory[/bold underline]") 
-    #     raise typer.Exit(code=1)
-    if not route.is_dir():
-        printerr(f"[red]Invalid path:[/red] {path} is [bold underline]not a directory[/bold underline]") 
-        raise typer.Exit(code=1)
-    
-    # Check if the path is already an andoc repository, if so exit
-    # if os.path.isdir(os.path.join(path, 'andoc')):
-    #     printerr(f"[red]Invalid path:[/red] {path} is [bold underline]already an andoc repository[/bold underline]")
-    #     raise typer.Exit(code=1)
-    if (route / 'andoc').is_dir():
-        printerr(f"[red]Invalid path:[/red] {path} is [bold underline]already an andoc repository[/bold underline]")
-        raise typer.Exit(code=1)
-
-    # Create the repository
-    # print(f"Initializing andoc repository at \"{os.path.abspath(path)}\"")
-    # os.mkdir(os.path.join(path, 'andoc'))
-    print(f"Initializing andoc repository at \"{route.absolute()}\"")
-    (route / 'andoc').mkdir()
+__VERSION__ = "0.1.0"
 
 
-def path_callback(ctx: typer.Context, path: str) -> Path | None:
-    if ctx.resilient_parsing:
-        return
-    
-    route = Path(path).resolve()
+app = typer.Typer(
+    help="📚 A documentation tool to manage the documentation of a project independently of the project itself.",
+    rich_markup_mode="rich",
+    epilog=f"With ❤️ by {BOLD_UNDERLINE%'@gfranciscoerazom'}",
+)
 
-    if not route.exists():
-        printerr(f"[red]Invalid path:[/red] {path} does [bold underline]not exist[/bold underline]") 
-        raise typer.BadParameter(path)
+app.add_typer(init.app, name="init")
+app.add_typer(add_doc.app, name="add-doc")
 
-    return route
 
-@app.command()
-def add_doc(
-    path: Annotated[
-        Path,
-        typer.Argument(
-            help="(str) 📂 The path to the object to add documentation to.",
+@app.callback(
+    invoke_without_command=True
+)
+def main(
+    version: Annotated[
+        bool,
+        typer.Option(
+            "--version",
+            "-v",
+            help="📜 Shows the current version of andoc.",
             rich_help_panel="Optional Arguments",
-            callback=path_callback
-        ) # type: ignore
-    ],
-
-    line: Annotated[
-        Optional[int],
-        typer.Argument(
-            help="(int) 🏷️ The line number to add the documentation to.",
-            rich_help_panel="Optional Arguments"
-        ) # type: ignore
-    ] = None,
-
-    # doc
-    # tags
-    # message
+            is_eager=True
+        )
+    ] = False
 ):
     """
-    Adds documentation to the specified file.
+    A documentation tool to manage the documentation of a project independently of the project itself.
     """
-    route = Path(path).resolve()
-
-    if not route.exists():
-        printerr(f"[red]Invalid path:[/red] {path} does [bold underline]not exist[/bold underline]") 
-        raise typer.Exit(code=1)
-
-    try:
-        andoc_folder = path_to_andoc_folder(route)
-    except Exception:
-        printerr(f"[red]Invalid path:[/red] {path} is [bold underline]not an andoc repository[/bold underline]")
-        raise typer.Exit(code=1)
-
-    doc_file = (andoc_folder / route.name).with_suffix('.andoc')
-    print(route)
-    print(andoc_folder)
-    if doc_file.exists():
-        return
-    else:
-        doc_file.touch()
+    if version:
+        typer.echo(f"andoc version {__VERSION__}")
 
 
 if __name__ == '__main__':
