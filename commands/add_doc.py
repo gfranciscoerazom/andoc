@@ -45,12 +45,21 @@ def add_doc(
     If the documentation file does not exist, it is created automatically with the same name as the file or directory with the extension .andoc. This files are going to have the same path as the file or directory they are documenting but inside the andoc folder.
     If the documentation file already exists, the documentation is added in ascending order by line number.
     """
-    andoc_folder = path_to_andoc_repository(path) #* Continue here
+    andoc_repository = path_to_andoc_repository(path)
 
-    doc_file = (andoc_folder / path.name).with_suffix('.andoc')
-    print(path)
-    print(andoc_folder)
-    if doc_file.exists():
-        return
-    else:
-        doc_file.touch()
+    # Divide the path into its components
+    andoc_repository_parts = andoc_repository.parts
+    path_parts = path.parts
+
+    # Remove the common parts
+    i = 0
+    for i in range(len(andoc_repository_parts)):
+        if andoc_repository_parts[i] != path_parts[i]:
+            break
+
+    path_parts = andoc_repository_parts + path_parts[i:]
+
+    path = Path(*path_parts)
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.with_suffix(".andoc").touch(exist_ok=True)
