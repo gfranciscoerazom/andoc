@@ -1,5 +1,5 @@
 from typing_extensions import Annotated
-import commands.add_doc as add_doc
+import commands.add as add
 import commands.init as init
 import typer
 
@@ -16,7 +16,7 @@ app = typer.Typer(
 )
 
 app.add_typer(init.app, name="init")
-app.add_typer(add_doc.app, name="add-doc")
+app.add_typer(add.app, name="add")
 
 
 @app.callback(
