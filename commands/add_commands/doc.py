@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 from typing_extensions import Annotated
 import typer
 
@@ -7,17 +6,16 @@ from models.methods.andoc_repository import path_to_andoc_repository
 
 
 app = typer.Typer(
-    help="📜 Add documentation to the specified file or directory.",
     rich_markup_mode="rich",
-    epilog="With ❤️ by @gfranciscoerazom",
 )
+
 
 @app.callback(
     help="📜 Adds documentation to the specified file or directory.",
     epilog="With ❤️ by @gfranciscoerazom",
     invoke_without_command=True,
 )
-def add_doc(
+def doc(
     path: Annotated[
         Path,
         typer.Argument(
@@ -31,14 +29,6 @@ def add_doc(
             resolve_path=True
         )
     ],
-
-    line: Annotated[
-        Optional[int],
-        typer.Argument(
-            help="🏷️ The line number to add the documentation to.",
-            rich_help_panel="Optional Arguments"
-        )
-    ] = None,
 ):
     """
     Creates a documentation for the specified file or directory in the andoc folder.
