@@ -8,19 +8,20 @@ from models.methods.andoc_repository import path_to_andoc_repository
 app = typer.Typer(
     rich_markup_mode="rich",
     help="➕ Program to add documentation to files and directories.",
+    no_args_is_help=True,
 )
 
 
 @app.command(
     help="📜 Adds documentation to the specified file or directory.",
     epilog="With ❤️ by @gfranciscoerazom",
+    no_args_is_help=True,
 )
 def doc(
     path: Annotated[
         Optional[Path],
         typer.Argument(
             help="📂 The path to the object to add documentation to.",
-            rich_help_panel="Optional Arguments",
             exists=True,
             file_okay=True,
             dir_okay=True,
@@ -31,10 +32,9 @@ def doc(
     ] = None, # Si el path es una carpeta, no se deberá pedir el uuid. Si es un archivo y se pasa el uuid solo se pedirá la documentación para ese uuid. Si es un archivo y no se pedirá la documentación para todos los uuids que tenga el archivo.
 
     uuid: Annotated[
-        Optional[list[UUID]],
+        Optional[UUID],
         typer.Argument(
             help="🔢 The UUID of the documentation.",
-            rich_help_panel="Optional Arguments",
         )
     ] = None,
 
@@ -42,7 +42,39 @@ def doc(
         Optional[str],
         typer.Argument(
             help="📝 The documentation to add.",
-            rich_help_panel="Optional Arguments",
+        )
+    ] = None,
+
+    paths_list: Annotated[
+        Optional[list[Path]],
+        typer.Option(
+            "--path",
+            "-p",
+            help="📂 The path to the object to add documentation to.",
+            exists=True,
+            file_okay=True,
+            dir_okay=True,
+            writable=True,
+            readable=True,
+            resolve_path=True
+        )
+    ] = None,
+
+    uuids_list: Annotated[
+        Optional[list[UUID]],
+        typer.Option(
+            "--uuid",
+            "-u",
+            help="🔢 The UUID of the documentation.",
+        )
+    ] = None,
+
+    docs_list: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            "--doc",
+            "-d",
+            help="📝 The documentation to add.",
         )
     ] = None,
 ):
@@ -51,7 +83,6 @@ def doc(
     If the documentation file does not exist, it is created automatically with the same name as the file or directory with the extension .andoc. This files are going to have the same path as the file or directory they are documenting but inside the andoc folder.
     If the documentation file already exists, the documentation is added in ascending order by line number.
     """
-    print(uuid)
     if path is None:
         return
 
@@ -78,6 +109,7 @@ def doc(
 @app.command(
     help="🔖 Adds a bookmark to the specified line in a file.",
     epilog="With ❤️ by @gfranciscoerazom",
+    no_args_is_help=True,
 )
 def bookmark(
     file: Annotated[
