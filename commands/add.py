@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from typing import Annotated, Optional
 from uuid import UUID
@@ -126,20 +127,22 @@ def doc(
     #     for path in paths_list:
     #         add_doc_file_to_andoc_repository(path)
 
+def index_where_path_are_different(path1: Path, path2: Path):
+    path1_parts = path1.parts
+    path2_parts = path2.parts
+
+    i = 0
+    for i in range(len(path1_parts)):
+        if path1_parts[i] != path2_parts[i]:
+            break
+
+    return i
+
+
 def add_doc_file_to_andoc_repository(path: Path):
     andoc_repository = path_to_andoc_repository(path)
 
-    # Divide the path into its components
-    andoc_repository_parts = andoc_repository.parts
-    path_parts = path.parts
-
-    # Remove the common parts
-    i = 0
-    for i in range(len(andoc_repository_parts)):
-        if andoc_repository_parts[i] != path_parts[i]:
-            break
-
-    path_parts = andoc_repository_parts + path_parts[i:]
+    path_parts = andoc_repository.parts + path.parts[index_where_path_are_different(andoc_repository, path):]
 
     path = Path(*path_parts)
 
@@ -155,12 +158,16 @@ def add_doc_file_to_andoc_repository(path: Path):
     no_args_is_help=True,
 )
 def bookmark(
-    file: Annotated[
-        typer.FileText,
+    path: Annotated[
+        Path,
         typer.Argument(
             help="📄 The file to add the bookmark to.",
-            mode="r+",
-            encoding="utf-8",
+            exists=True,
+            file_okay=True,
+            dir_okay=False,
+            writable=True,
+            readable=True,
+            resolve_path=True
         )
     ],
 
@@ -195,8 +202,26 @@ def bookmark(
     """
     doc_uuid = uuid.uuid4()
 
-    data = file.readlines()
-    data.insert(line, f"{prefix}andoc: {doc_uuid}{postfix}\n")
-    file.seek(0)
-    file.writelines(data)
-    file.close()
+    # data = file.readlines()
+    # data.insert(line, f"{prefix}andoc: {doc_uuid}{postfix}\n")
+    # file.seek(0)
+    # file.writelines(data)
+    # file.close()
+
+    with open(path, "r+", encoding="utf-8") as f:
+        data = f.readlines()
+        data.insert(line - 1, f"{prefix}andoc: {doc_uuid}{postfix}\n")
+        f.seek(0)
+        f.writelines(data)
+        f.truncate()
+
+    andoc_repository = path_to_andoc_repository(Path("."))
+    bookmarks_json = andoc_repository / "andoc_bookmarks.json"
+    key = Path(*path.parts[index_where_path_are_different(andoc_repository, path):])
+
+    with open(bookmarks_json, "r+") as f:
+        bookmarks = json.load(f)
+        bookmarks["bookmarks"][str(key)] = bookmarks["bookmarks"].get(str(key), []) + [str(doc_uuid)]
+        f.seek(0)
+        json.dump(bookmarks, f, indent=4)
+        f.truncate()
