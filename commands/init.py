@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from typing_extensions import Annotated
 import typer
@@ -12,14 +13,14 @@ app = typer.Typer(
 )
 
 
-def already_is_andoc_repository_validation(ctx: typer.Context, path: Path) -> Path | None:
+def already_have_a_andoc_repository_validation(ctx: typer.Context, path: Path) -> Path | None:
     """
     Checks if the specified path is an andoc repository.
     """
     if ctx.resilient_parsing:
         return
     if has_an_andoc_repository(path):
-        raise typer.BadParameter(f"{path} is already an andoc repository")
+        raise typer.BadParameter(f"{path} already have an andoc repository")
 
     return path
 
@@ -41,7 +42,7 @@ def init(
             writable=True,
             readable=True,
             resolve_path=True,
-            callback=already_is_andoc_repository_validation
+            callback=already_have_a_andoc_repository_validation
         )
     ] = Path('.')
 ):
@@ -51,4 +52,16 @@ def init(
 
     # Create the repository
     print(f'Initializing andoc repository at "{path.absolute()}"')
-    (path / 'andoc').mkdir()
+    path = (path / 'andoc')
+    path.mkdir()
+
+    path_andoc_bookmarks_json = (path / 'andoc_bookmarks.json')
+    path_andoc_bookmarks_json.touch()
+    with open(path_andoc_bookmarks_json, 'w') as f:
+        json.dump(
+            {
+                'bookmarks': {}
+            },
+            f,
+            indent=4
+        )
