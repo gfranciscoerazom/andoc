@@ -110,7 +110,7 @@ def doc(
     if len(paths_list) > 0:
         for p in paths_list:
             doc_file_path = add_doc_file_to_andoc_repository(p)
-            doc_text = typer.prompt("Documentation")
+            doc_text = typer.prompt(f'Documentation of "{p}"', prompt_suffix="\n> ")
             doc_file_path.write_text(doc_text)
 
         return
