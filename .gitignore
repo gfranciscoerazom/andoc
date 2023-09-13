@@ -1,3 +1,4 @@
+andoc/
 # Created by https://www.toptal.com/developers/gitignore/api/git,linux,macos,pydev,images,python,pycharm,windows,jetbrains,pycharm+all,pycharm+iml,jetbrains+all,jetbrains+iml,visualstudiocode,pythonvanilla
 # Edit at https://www.toptal.com/developers/gitignore?templates=git,linux,macos,pydev,images,python,pycharm,windows,jetbrains,pycharm+all,pycharm+iml,jetbrains+all,jetbrains+iml,visualstudiocode,pythonvanilla
 
@@ -331,7 +332,8 @@ modules.xml
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*

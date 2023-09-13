@@ -98,9 +98,11 @@ def doc(
     If the documentation file already exists, the documentation is added in ascending order by line number.
     """
     if paths_list is not None:
-        doc_file_path = add_doc_file_to_andoc_repository(paths_list[0])
-        doc_text = typer.prompt("Documentation")
-        doc_file_path.write_text(doc_text)
+        for p in paths_list:
+            doc_file_path = add_doc_file_to_andoc_repository(p)
+            doc_text = typer.prompt("Documentation")
+            doc_file_path.write_text(doc_text)
+
         return
 
     # if bookmark is not None:
@@ -216,12 +218,16 @@ def bookmark(
         f.truncate()
 
     andoc_repository = path_to_andoc_repository(Path("."))
-    bookmarks_json = andoc_repository / "andoc_bookmarks.json"
+    bookmarks_json = andoc_repository / "andoc.json"
     key = Path(*path.parts[index_where_path_are_different(andoc_repository, path):])
 
     with open(bookmarks_json, "r+") as f:
         bookmarks = json.load(f)
-        bookmarks["bookmarks"][str(key)] = bookmarks["bookmarks"].get(str(key), []) + [str(doc_uuid)]
+        bookmarks["bookmarks"][str(key)] = bookmarks["bookmarks"].get(str(key), []) + [{
+            "uuid": str(doc_uuid),
+            "documented": False,
+            # "memo":
+        }]
         f.seek(0)
         json.dump(bookmarks, f, indent=4)
         f.truncate()

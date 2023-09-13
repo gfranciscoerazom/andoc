@@ -55,7 +55,7 @@ def init(
     path = (path / 'andoc')
     path.mkdir()
 
-    path_andoc_bookmarks_json = (path / 'andoc_bookmarks.json')
+    path_andoc_bookmarks_json = (path / 'andoc.json')
     path_andoc_bookmarks_json.touch()
     with open(path_andoc_bookmarks_json, 'w') as f:
         json.dump(
