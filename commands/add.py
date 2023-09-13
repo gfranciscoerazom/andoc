@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 from uuid import UUID
 import uuid
 import typer
@@ -32,44 +32,44 @@ andoc add doc -b --> añadir la documentación a todos los bookmarks sin documen
     no_args_is_help=True,
 )
 def doc(
-    bookmark: Annotated[
-        Optional[UUID],
-        typer.Argument(
-            help="🔢 The UUID of the documentation.",
-        )
-    ] = None,
+    # bookmark: Annotated[
+    #     Optional[UUID],
+    #     typer.Argument(
+    #         help="🔢 The UUID of the documentation.",
+    #     )
+    # ] = None,
 
-    path: Annotated[
-        Optional[Path],
-        typer.Argument(
-            help="📂 The path to the object to add documentation to.",
-            exists=True,
-            file_okay=True,
-            dir_okay=True,
-            writable=True,
-            readable=True,
-            resolve_path=True
-        )
-    ] = None, # Si el path es una carpeta, no se deberá pedir el uuid. Si es un archivo y se pasa el uuid solo se pedirá la documentación para ese uuid. Si es un archivo y no se pedirá la documentación para todos los uuids que tenga el archivo.
+    # path: Annotated[
+    #     Optional[Path],
+    #     typer.Argument(
+    #         help="📂 The path to the object to add documentation to.",
+    #         exists=True,
+    #         file_okay=True,
+    #         dir_okay=True,
+    #         writable=True,
+    #         readable=True,
+    #         resolve_path=True
+    #     )
+    # ] = None, # Si el path es una carpeta, no se deberá pedir el uuid. Si es un archivo y se pasa el uuid solo se pedirá la documentación para ese uuid. Si es un archivo y no se pedirá la documentación para todos los uuids que tenga el archivo.
 
-    doc: Annotated[
-        Optional[str],
-        typer.Argument(
-            help="📝 The documentation to add.",
-        )
-    ] = None,
+    # doc: Annotated[
+    #     Optional[str],
+    #     typer.Argument(
+    #         help="📝 The documentation to add.",
+    #     )
+    # ] = None,
 
     bookmarks_list: Annotated[
-        Optional[list[UUID]],
+        list[UUID],
         typer.Option(
             "--bookmark",
             "-b",
             help="🔢 The UUID of the documentation.",
         )
-    ] = None,
+    ] = [],
 
     paths_list: Annotated[
-        Optional[list[Path]],
+        list[Path],
         typer.Option(
             "--path",
             "-p",
@@ -81,23 +81,33 @@ def doc(
             readable=True,
             resolve_path=True,
         )
-    ] = None,
+    ] = [],
 
     docs_list: Annotated[
-        Optional[list[str]],
+        list[str],
         typer.Option(
             "--doc",
             "-d",
             help="📝 The documentation to add.",
         )
-    ] = None,
+    ] = [],
 ):
     """
     Creates a documentation for the specified file or directory in the andoc folder.
     If the documentation file does not exist, it is created automatically with the same name as the file or directory with the extension .andoc. This files are going to have the same path as the file or directory they are documenting but inside the andoc folder.
     If the documentation file already exists, the documentation is added in ascending order by line number.
     """
-    if paths_list is not None:
+    if len(bookmarks_list) == 0 and len(paths_list) > 0 and len(docs_list) > 0:
+        if len(paths_list) != len(docs_list):
+            raise typer.BadParameter("You must specify the same number of paths and docs.")
+
+        for i, p in enumerate(paths_list):
+            doc_file_path = add_doc_file_to_andoc_repository(p)
+            doc_file_path.write_text(docs_list[i])
+
+        return
+
+    if len(paths_list) > 0:
         for p in paths_list:
             doc_file_path = add_doc_file_to_andoc_repository(p)
             doc_text = typer.prompt("Documentation")
@@ -117,13 +127,13 @@ def doc(
     #     andoc_repository = path_to_andoc_repository(Path("."))
     #     return
 
-    if bookmark is None \
-      and bookmarks_list is None \
-      and path       is None \
-      and paths_list is None \
-      and doc        is not None \
-      or  docs_list  is not None:
-        raise typer.BadParameter("You must specify the path to the file or directory or a uuid to add the documentation to.")
+    # if bookmark is None \
+    #   and bookmarks_list is None \
+    #   and path       is None \
+    #   and paths_list is None \
+    #   and doc        is not None \
+    #   or  docs_list  is not None:
+    #     raise typer.BadParameter("You must specify the path to the file or directory or a uuid to add the documentation to.")
 
     # if paths_list is not None:
     #     for path in paths_list:
